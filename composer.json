@@ -1,0 +1,20 @@
+{
+    "name": "RusaDrako/mail",
+    "description": "Отправка почтовых сообщений",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Petukhov Leonid",
+            "email": "f182@rambler.ru"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "rd\\mail\\": "src"
+        },
+        "files": [
+            "src/autoload.php"
+        ]
+    }
+}
