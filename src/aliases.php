@@ -1,17 +1,14 @@
 <?php
 
-if (class_exists('RD_mail', false)) {
-    return;
+if (class_exists('RD_Mail', false)) {
+	return;
 }
 
 $classMap = [
-    'rd\\mail\\mail' => 'RD_Mail',
-    'rd\\mail\\mail_addon' => 'RD_Mail_Addon',
+	'RusaDrako\\mail\\mail'         => 'RD_Mail',
+	'RusaDrako\\mail\\mail_addon'   => 'RD_Mail_Addon',
 ];
 
 foreach ($classMap as $class => $alias) {
-    class_alias($class, $alias);
+	class_alias($class, $alias);
 }
-
-//class RD_Mail extends \rd\mail\mail {}
-//class RD_Mail_Addon extends \rd\mail\mail_addon {}

@@ -1,6 +1,5 @@
 <?php
-
-namespace rd\mail;
+namespace RusaDrako\mail;
 
 
 

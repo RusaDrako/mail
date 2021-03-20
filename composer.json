@@ -1,17 +1,20 @@
 {
-    "name": "RusaDrako/mail",
+    "name": "rusadrako/mail",
     "description": "Отправка почтовых сообщений",
     "license": "MIT",
     "authors": [
         {
             "name": "Petukhov Leonid",
-            "email": "f182@rambler.ru"
+            "email": "rusadrako@yandex.ru"
         }
     ],
-    "require": {},
+    "require": {
+        "php": ">=7.0.0"
+    },
+    "minimum-stability": "stable",
     "autoload": {
         "psr-4": {
-            "rd\\mail\\": "src"
+            "RusaDrako\\mail\\": "src"
         },
         "files": [
             "src/autoload.php"

@@ -1,14 +1,13 @@
 <?php
-
-namespace rd\mail;
-
+namespace RusaDrako\mail;
 
 
-/** 
- * Mail v 1.0.0</b> Класс отправки почтовых сообщений.
+
+/**
+ * Отправка почтовых сообщений.
  * @version 1.0.0
  * @created 2018-09-06
- * @author Петухов Леонид <f182@rambler.ru>
+ * @author Петухов Леонид <rusadrako@yandex.ru>
  */
 class mail {
 
@@ -315,7 +314,7 @@ class mail {
 
 
 
-	/** Добавляет прикреплённые файлы к письму 
+	/** Добавляет прикреплённые файлы к письму
 	 * @param string $file_name_full Полный путь подгружкемого файла
 	 * @param string $file_name Новое имя подгружаемого файла
 	 */
