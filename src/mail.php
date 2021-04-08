@@ -12,39 +12,38 @@ namespace RusaDrako\mail;
 class mail {
 
 	/** Адресат получателя */
-	private $_to					= '';
+	private $_to              = '';
 	/** Адресат отправителя */
-	private $_from					= '';
+	private $_from            = '';
 	/** Заголовок письма */
-	private $_subject				= '';
+	private $_subject         = '';
 	/** Текст письма */
-	private $_message				= '';
+	private $_message         = '';
 	/** Файлы изображений, в тексте письма */
-	private $_message_img			= [];
+	private $_message_img     = [];
 	/** Прикреплённые файлы */
-	private $_file					= [];
+	private $_file            = [];
 	/** Тип сообщения html/text */
-	private $_message_type			= false;
+	private $_message_type    = false;
 
 	/** Основной разделитель */
-	private $_boundary				= '';
+	private $_boundary        = '';
 
 	/** Сформированный заголовок письма */
-	private $_header				= '';
+	private $_header          = '';
 	/** Сформированное тело письма */
-	private $_body					= '';
+	private $_body            = '';
 
 	/** Метка тестового режима */
-	private $_test					= false;
+	private $_test            = false;
 
 	/** Кодировка письма */
-	private $_charset				= 'utf-8';
-
+	private $_charset         = 'utf-8';
 
 	/** Системные сообщения */
-	var $error_message				= [];
+	var $error_message        = [];
 	/** Объект модели */
-	private static $_object			= null;
+	private static $_object   = null;
 
 
 
@@ -150,19 +149,27 @@ class mail {
 
 	/** Чистит текущий объект */
 	public function clean() {
-		$this->_to				= [];					# Адресат получателя
-		$this->_from			= [						# Адресат отправителя
-			'test'					=> 'test@test.ru'
+		# Адресат получателя
+		$this->_to            = [];
+		# Адресат отправителя
+		$this->_from          = [
+			'test'       => 'test@test.ru'
 		];
-		$this->_subject			= '';					# Заголовок письма
-		$this->_message			= '';					# Текст письма
-		$this->_message_img		= [];					# Файлы изображений, в тексте письма
-		$this->_file			= [];					# Прикреплённые файлы
-
-		$this->message__html('html');				# Тип сообщения html
-
-		$this->_header			= '';					# Сформированный заголовок письма
-		$this->_body			= '';					# Сформированное тело письма
+		# Заголовок письма
+		$this->_subject       = '';
+		# Текст письма
+		$this->_message       = '';
+		# Файлы изображений, в тексте письма
+		$this->_message_img   = [];
+		# Прикреплённые файлы
+		$this->_file          = [];
+		# Сформированный заголовок письма
+		$this->_header        = '';
+		# Сформированное тело письма
+		$this->_body          = '';
+		# Тип сообщения html
+		$this->message__html('html');
+		# Вернуть текущий объект
 		return $this;
 	}
 
@@ -180,13 +187,11 @@ class mail {
 
 
 
-
 	/** Прописываем кодировку письма */
 	public function charset($encoding) {
 		$this->_charset = $encoding;
 		return $this;
 	}
-
 
 
 
@@ -202,13 +207,11 @@ class mail {
 
 
 
-
 	/** Прописываем html-тип письма */
 	public function type_html() {
 		$this->_message_type = 'text/html';
 		return $this;
 	}
-
 
 
 
@@ -299,11 +302,11 @@ class mail {
 				$_file_name = basename($file_name_full);
 			}
 			# Открываем соединение с файлом
-			$file			= fopen($file_name_full,"rb");
+			$file         = fopen($file_name_full,"rb");
 			# Получаем mime-тип файла
-			$mime_type		= mime_content_type($file_name_full);
+			$mime_type    = mime_content_type($file_name_full);
 			# Получаем содержимое файла
-			$img_stream		= base64_encode(fread($file, filesize($file_name_full)));
+			$img_stream   = base64_encode(fread($file, filesize($file_name_full)));
 			# Закрываем соединение с файлом
 			fclose($file);
 			# Добавление содержимого в письмо
@@ -327,9 +330,9 @@ class mail {
 	public function insert_img_stream($id, $img_stream, $mime_type, $file_name) {
 		# Добавляем информацию в массив
 		$this->_message_img[$id] = [
-			'name'	=> $file_name,
-			'type'	=> $mime_type,
-			'body'	=> $img_stream,
+			'name'   => $file_name,
+			'type'   => $mime_type,
+			'body'   => $img_stream,
 		];
 		return $this;
 	}
@@ -355,11 +358,11 @@ class mail {
 				$_file_name = basename($file_name_full);
 			}
 			# Открываем соединение с файлом
-			$file				= fopen($file_name_full,"rb");
+			$file          = fopen($file_name_full,"rb");
 			# Получаем mime-тип файла
-			$mime_type			= mime_content_type($file_name_full);
+			$mime_type     = mime_content_type($file_name_full);
 			# Получаем содержимое файла
-			$file_stream		= base64_encode(fread($file, filesize($file_name_full)));
+			$file_stream   = base64_encode(fread($file, filesize($file_name_full)));
 			# Закрываем соединение с файлом
 			fclose($file);
 			# Добавление файла к письму
@@ -384,9 +387,9 @@ class mail {
 			$mime_type = "application/octet-stream";
 		}
 		$this->_file[] = [
-			'name'	=> $file_name,
-			'type'	=> $mime_type,
-			'body'	=> $file_stream,
+			'name'   => $file_name,
+			'type'   => $mime_type,
+			'body'   => $file_stream,
 		];
 		return $this;
 	}
@@ -457,7 +460,6 @@ class mail {
 		# Префикс Resent- может быть добавлен при пересылке письма. Например, «Resent-From:» или «Resent-To:». Такие поля содержат информацию, добавленную тем, кто переслал сообщение:
 		# Поле «From:» содержит адрес первоначального отправителя.
 		# «Resent-From:» — адрес переславшего.
-//var_dump($this->_to);
 		$headers[] = 'Content-Transfer-Encoding: base64';
 		$headers[] = 'Message-ID: ' . time() . '.' . md5(time().microtime()) . '.' . $_from;			# Message-Id: — более или менее уникальный идентификатор, присваиваемый каждому сообщению, чаще всего первым почтовым сервером, который встретится у него на пути. Обычно он имеет форму «blablabla@domen.ru», где «blablabla» может быть абсолютно чем угодно, а вторая часть — имя машины, присвоившей идентификатор. Иногда, но редко, «blablabla» включает в себя имя отправителя.
 //		$headers[] = 'To: ' . $this->_rework_email($this->_to);	# To: — адрес получателя (или адреса). При этом поле «To:» может не содержать адреса получателя, так как прохождение письма базируется на конвертном заголовке «To», а не на заголовке сообщения «To:».
@@ -479,8 +481,6 @@ class mail {
 		$headers[] = 'X-Priority: 1 (Higuest)';				# Priority: — свободный заголовок, устанавливающий приоритет сообщения. Большинство программ его игнорируют. Часто используется спаммерами в форме «Priority: urgent» с целью привлечения внимания к сообщению.
 		$headers[] = 'X-MSMail-Priority: High';
 		$headers[] = 'Importance: High';
-//		$headers[] = 'Content-Type: text/html; charset=utf-8';
-//		$headers[] = 'Content-Transfer-Encoding: 8bit';		# Content-Transfer-Encoding: — MIME-заголовок, не имеет отношения к доставке почты, отвечает за то, как программа-получатель интерпретирует содержимое сообщения.
 		$headers[] = 'Content-Type: multipart/related; boundary="' . $this->_boundary . '"';		# Content-Type: — MIME-заголовок, сообщающий почтовой программе о типе данных, хранящихся в сообщении.
 
 		# Формируем тело письма (основной текст)
@@ -521,8 +521,8 @@ class mail {
 		$body[] = '--' . $this->_boundary . '--';
 
 		$glue = "\r\n";
-		$this->_header		= implode($glue, $headers);
-		$this->_body		= implode($glue, $body);
+		$this->_header   = implode($glue, $headers);
+		$this->_body     = implode($glue, $body);
 	}
 
 
