@@ -5,7 +5,7 @@ namespace RusaDrako\mail;
 
 /**
  * Отправка почтовых сообщений.
- * @version 1.0.0
+ * @version 1.1.0
  * @created 2018-09-06
  * @author Петухов Леонид <rusadrako@yandex.ru>
  */
@@ -23,6 +23,8 @@ class mail {
 	private $_message_img			= [];
 	/** Прикреплённые файлы */
 	private $_file					= [];
+	/** Тип сообщения html/text */
+	private $_message_type			= false;
 
 	/** Основной разделитель */
 	private $_boundary				= '';
@@ -70,9 +72,9 @@ class mail {
 	/** Вызов объекта
 	* @return object Объект модели
 	*/
-	public static function call() {
+	public static function call(...$args) {
 		if (null === self::$_object) {
-			self::$_object = new static();
+			self::$_object = new static(...$args);
 		}
 		return self::$_object;
 	}
@@ -81,7 +83,7 @@ class mail {
 
 
 
-	/* Чистит строку */
+	/** Чистит строку */
 	private function _clean_line($value) {
 		# Удаляем переносы
 		return str_replace([chr(10), chr(13)], [' ', ' '], $value);
@@ -100,11 +102,11 @@ class mail {
 
 
 
-	/* Кодировка строки */
+	/** Проверяет 8-битная ли кодировка */
 	private function _rework_charset($value) {
 		# Если указана кодировка отличная от utf-8
 		if ($this->_charset != 'utf-8') {
-			# Производим перекодировку элемента
+			# Производим перекодировку заголовка и тела письма
 			$value = iconv('utf-8', $this->_charset, $value);
 		}
 		return $value;
@@ -114,7 +116,7 @@ class mail {
 
 
 
-	/** Формирует строку email */
+	/** Перерабатывает адрес отправителя/получателя */
 	private function _rework_email($array) {
 		$_from = [];
 		foreach ($array as $k => $v) {
@@ -136,7 +138,7 @@ class mail {
 
 
 
-	/** Кодирует данные в формат MIME base64 */
+	/** Перерабатывает строку в 8-битный вид */
 	private function _rework_8bit($value) {
 		$value = '=?' . $this->_charset . '?B?' . base64_encode($value) . '?=';
 		return $value;
@@ -146,7 +148,7 @@ class mail {
 
 
 
-	/** Чистит настройки письма */
+	/** Чистит текущий объект */
 	public function clean() {
 		$this->_to				= [];					# Адресат получателя
 		$this->_from			= [						# Адресат отправителя
@@ -157,6 +159,8 @@ class mail {
 		$this->_message_img		= [];					# Файлы изображений, в тексте письма
 		$this->_file			= [];					# Прикреплённые файлы
 
+		$this->message__html('html');				# Тип сообщения html
+
 		$this->_header			= '';					# Сформированный заголовок письма
 		$this->_body			= '';					# Сформированное тело письма
 		return $this;
@@ -166,7 +170,7 @@ class mail {
 
 
 
-	/** Устанавливает маркер тестового режима */
+	/** Тестовый режим */
 	public function test($bool) {
 		$this->_test = $bool;
 		return $this;
@@ -177,7 +181,7 @@ class mail {
 
 
 
-	/** Задаёт кодировку письма */
+	/** Прописываем кодировку письма */
 	public function charset($encoding) {
 		$this->_charset = $encoding;
 		return $this;
@@ -188,9 +192,29 @@ class mail {
 
 
 
-	/** Добавляет адресат получателя
-	 * @param string/array $value email получателя
-	 */
+	/** Прописываем text-тип письма */
+	public function type_text() {
+		$this->_message_type = 'text/plain';
+		return $this;
+	}
+
+
+
+
+
+
+	/** Прописываем html-тип письма */
+	public function type_html() {
+		$this->_message_type = 'text/html';
+		return $this;
+	}
+
+
+
+
+
+
+	/** Добавляет адресат получателя */
 	private function _to($value) {
 		$this->_to = [];
 		# Если передан массив
@@ -255,7 +279,7 @@ class mail {
 
 
 
-	/** Добавление файлов изображений, в тексте письма
+	/** Добавляет файл изображений в тексте письма
 	 * @param string $id ID картинки для добавления в тело письма
 	 * @param string $file_name_full Полный путь подгружкемого файла
 	 * @param string $file_name Новое имя подгружаемого файла
@@ -292,7 +316,7 @@ class mail {
 
 
 
-	/** Добавление потока файла изображений, в тексте письма
+	/** Добавляет поток файла изображений в тексте письма
 	 * @param string $id ID картинки для добавления в тело письма
 	 * @param string $img_stream Поток файла
 	 * @param string $mime_type mime-тип файла
@@ -314,7 +338,7 @@ class mail {
 
 
 
-	/** Добавляет прикреплённые файлы к письму
+	/** Добавляет прикреплённый к письму файл
 	 * @param string $file_name_full Полный путь подгружкемого файла
 	 * @param string $file_name Новое имя подгружаемого файла
 	 */
@@ -339,7 +363,7 @@ class mail {
 			# Закрываем соединение с файлом
 			fclose($file);
 			# Добавление файла к письму
-			$this->attach_file_stream($file_stream, $mime_type, $_file_name);
+			$this->attach_file_stream($file_stream, $_file_name, $mime_type);
 		}
 		return $this;
 	}
@@ -348,12 +372,17 @@ class mail {
 
 
 
-	/** Добавление потока прикреплённых файлов, в тексте письма
+	/** Добавляет прикреплённый к письму файл
 	 * @param string $file_stream Поток файла
-	 * @param string $mime_type mime-тип файла
 	 * @param string $file_name Новое имя подгружаемого файла
+	 * @param string $mime_type mime-тип файла
 	 */
-	public function attach_file_stream($file_stream, $mime_type, $file_name) {
+	public function attach_file_stream($file_stream, $file_name, $mime_type = false) {
+		# Если тип файла не указан
+		if (!$mime_type) {
+			# Ставим тип: двоичный файл без указания формата
+			$mime_type = "application/octet-stream";
+		}
 		$this->_file[] = [
 			'name'	=> $file_name,
 			'type'	=> $mime_type,
@@ -366,7 +395,7 @@ class mail {
 
 
 
-	/** Формирует структуру почтового сообщения */
+	/** Формируем структуру почтового сообщения */
 	private function _create_mail() {
 		# Генерируем разделитель письма
 		$this->_boundary = '=_NextPart_' . md5(uniqid(time()));
@@ -386,7 +415,7 @@ class mail {
 		# Content-Transfer-Encoding: — MIME-заголовок, не имеет отношения к доставке почты, отвечает за то, как программа-получатель интерпретирует содержимое сообщения.
 		# MIME — стандартному метод помещения в письмо нетекстовой информации (см. в Википедии).
 		# Content-Type: — MIME-заголовок, сообщающий почтовой программе о типе данных, хранящихся в сообщении.
-		# Date: — дата создания сообщения. Не стоит принимать на веру из-за возможности подделки или ошибки во времени у отправителя.
+		# Date: — дата создания сообщения. Не стоит принимать на веру из-за возможности подделки или ошибки во времени у отправителя. Формат 'Mon, 07 May 2012 12:09:16 -0700'
 		# Errors-To: — адрес для отсылки автоматических сообщений об ошибках. Большинство отправителей обычно хотят получать сообщения об ошибках на исходящий адрес, который используется почтовыми серверами по умолчанию.
 		# From (без двоеточия) — конвертный заголовок «From» формируется на базе информации, полученной от команды MAIL FROM. Например, если отправляющая машина говорит MAIL FROM: 123@123.com, получающая машина сгенерирует строчку следующего вида: «From 123@123.com»
 		# ! Конвертный заголовок создается не отправителем сообщения, а компьютером, через который прошло это сообщение.
@@ -456,8 +485,7 @@ class mail {
 
 		# Формируем тело письма (основной текст)
 		$body[] = '--' . $this->_boundary;
-//		$body[] = 'Content-type: text/html; charset="utf-8"';
-		$body[] = 'Content-type: text/html; charset="' . $this->_charset . '"';
+		$body[] = 'Content-type: ' . $this->_message_type . '; charset="' . $this->_charset . '"';
 		$body[] = 'Content-Transfer-Encoding: 8bit';		# Content-Transfer-Encoding: — MIME-заголовок, не имеет отношения к доставке почты, отвечает за то, как программа-получатель интерпретирует содержимое сообщения.
 		$body[] = '';
 		$body[] = $message;
@@ -511,12 +539,12 @@ class mail {
 		# Значение результата по-умолчанию
 		$result = false;
 		# Тестовый режим
-		if($this->_test) {
+		if ($this->_test) {
 			echo $this->error_message[] = $str_mail_list . " - Письмо ушло!";
 			$this->_mail_info($str_mail_list);
 			$result = true;
 		} else {
-			if(mail($mail_list, $this->_subject, $this->_body, $this->_header)) {
+			if (mail($mail_list, $this->_subject, $this->_body, $this->_header)) {
 				$this->error_message[] = $str_mail_list . " - Письмо ушло!";
 				$result = true;
 			} else {
