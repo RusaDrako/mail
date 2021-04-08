@@ -168,7 +168,7 @@ class mail {
 		# Сформированное тело письма
 		$this->_body          = '';
 		# Тип сообщения html
-		$this->message__html('html');
+		$this->type_html('html');
 		# Вернуть текущий объект
 		return $this;
 	}
