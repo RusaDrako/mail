@@ -12,38 +12,38 @@ namespace RusaDrako\mail;
 class mail {
 
 	/** Адресат получателя */
-	private $_to              = '';
+	protected $_to              = '';
 	/** Адресат отправителя */
-	private $_from            = '';
+	protected $_from            = '';
 	/** Заголовок письма */
-	private $_subject         = '';
+	protected $_subject         = '';
 	/** Текст письма */
-	private $_message         = '';
+	protected $_message         = '';
 	/** Файлы изображений, в тексте письма */
-	private $_message_img     = [];
+	protected $_message_img     = [];
 	/** Прикреплённые файлы */
-	private $_file            = [];
+	protected $_file            = [];
 	/** Тип сообщения html/text */
-	private $_message_type    = false;
+	protected $_message_type    = false;
 
 	/** Основной разделитель */
-	private $_boundary        = '';
+	protected $_boundary        = '';
 
 	/** Сформированный заголовок письма */
-	private $_header          = '';
+	protected $_header          = '';
 	/** Сформированное тело письма */
-	private $_body            = '';
+	protected $_body            = '';
 
 	/** Метка тестового режима */
-	private $_test            = false;
+	protected $_test            = false;
 
 	/** Кодировка письма */
-	private $_charset         = 'utf-8';
+	protected $_charset         = 'utf-8';
 
 	/** Системные сообщения */
 	var $error_message        = [];
 	/** Объект модели */
-	private static $_object   = null;
+	protected static $_object   = null;
 
 
 
@@ -83,7 +83,7 @@ class mail {
 
 
 	/** Чистит строку */
-	private function _clean_line($value) {
+	protected function _clean_line($value) {
 		# Удаляем переносы
 		return str_replace([chr(10), chr(13)], [' ', ' '], $value);
 	}
@@ -93,7 +93,7 @@ class mail {
 
 
 	/* Проверяет 8-битная ли кодировка */
-	private function _is_8bit($value) {
+	protected function _is_8bit($value) {
 		return preg_match('~[\x80-\xff]~', $value);
 	}
 
@@ -102,7 +102,7 @@ class mail {
 
 
 	/** Проверяет 8-битная ли кодировка */
-	private function _rework_charset($value) {
+	protected function _rework_charset($value) {
 		# Если указана кодировка отличная от utf-8
 		if ($this->_charset != 'utf-8') {
 			# Производим перекодировку заголовка и тела письма
@@ -116,7 +116,7 @@ class mail {
 
 
 	/** Перерабатывает адрес отправителя/получателя */
-	private function _rework_email($array) {
+	protected function _rework_email($array) {
 		$_from = [];
 		foreach ($array as $k => $v) {
 			if ($k != $v) {
@@ -138,7 +138,7 @@ class mail {
 
 
 	/** Перерабатывает строку в 8-битный вид */
-	private function _rework_8bit($value) {
+	protected function _rework_8bit($value) {
 		$value = '=?' . $this->_charset . '?B?' . base64_encode($value) . '?=';
 		return $value;
 	}
@@ -218,7 +218,7 @@ class mail {
 
 
 	/** Добавляет адресат получателя */
-	private function _to($value) {
+	protected function _to($value) {
 		$this->_to = [];
 		# Если передан массив
 		if (is_array($value)) {
@@ -399,7 +399,7 @@ class mail {
 
 
 	/** Формируем структуру почтового сообщения */
-	private function _create_mail() {
+	 function _create_mail() {
 		# Генерируем разделитель письма
 		$this->_boundary = '=_NextPart_' . md5(uniqid(time()));
 		# Получаем заголовок
@@ -561,7 +561,7 @@ class mail {
 
 
 	/** Отправка письма - вывод инфы */
-	private function _mail_info($str_mail_list) {
+	 function _mail_info($str_mail_list) {
 		echo '<pre style="background: #ffb; color: #000;">';
 		echo str_replace(['<', '>'], ['&#139', '&#155'], $str_mail_list);
 		echo '<hr>';
