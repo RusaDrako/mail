@@ -12,7 +12,11 @@ namespace RusaDrako\mail;
 class mail {
 
 	/** Адресат получателя */
-	protected $_to              = '';
+	protected $_to              = [];
+	/** Адресат получателя (копия) */
+	protected $_to_cc           = [];
+	/** Адресат получателя (скрытая копия) */
+	protected $_to_bcc          = [];
 	/** Адресат отправителя */
 	protected $_from            = '';
 	/** Заголовок письма */
@@ -151,6 +155,8 @@ class mail {
 	public function clean() {
 		# Адресат получателя
 		$this->_to            = [];
+		$this->_to_cc         = [];
+		$this->_to_bcc        = [];
 		# Адресат отправителя
 		$this->_from          = [
 			'test'       => 'test@test.ru'
@@ -233,6 +239,40 @@ class mail {
 		} else {
 			# Добавляем элемент
 			$this->_to[$value] = $value;
+		}
+		return $this;
+	}
+
+
+
+
+
+	/** Добавляет адресат получателя (копия)
+	 * @param string $mail email
+	 * @param string $name Имя отправителя
+	 */
+	public function to_cc($mail, $name = null) {
+		if ($name) {
+			$this->_to_cc[$name] = $mail;
+		} else {
+			$this->_to_cc[$mail] = $mail;
+		}
+		return $this;
+	}
+
+
+
+
+
+	/** Добавляет адресат получателя (скрытая копия)
+	 * @param string $mail email
+	 * @param string $name Имя отправителя
+	 */
+	public function to_bcc($mail, $name = null) {
+		if ($name) {
+			$this->_to_bcc[$name] = $mail;
+		} else {
+			$this->_to_bcc[$mail] = $mail;
 		}
 		return $this;
 	}
@@ -409,6 +449,8 @@ class mail {
 		# Получаем тело письма
 		$message = $this->_rework_charset($this->_message);
 
+		$_to_сс_full = $this->_rework_email($this->_to_cc);
+		$_to_bсс_full = $this->_rework_email($this->_to_bcc);
 		$_from_full = $this->_rework_email($this->_from);
 		$_from = \implode(', ', $this->_from);
 
@@ -464,7 +506,14 @@ class mail {
 		$headers[] = 'Message-ID: ' . time() . '.' . md5(time().microtime()) . '.' . $_from;			# Message-Id: — более или менее уникальный идентификатор, присваиваемый каждому сообщению, чаще всего первым почтовым сервером, который встретится у него на пути. Обычно он имеет форму «blablabla@domen.ru», где «blablabla» может быть абсолютно чем угодно, а вторая часть — имя машины, присвоившей идентификатор. Иногда, но редко, «blablabla» включает в себя имя отправителя.
 //		$headers[] = 'To: ' . $this->_rework_email($this->_to);	# To: — адрес получателя (или адреса). При этом поле «To:» может не содержать адреса получателя, так как прохождение письма базируется на конвертном заголовке «To», а не на заголовке сообщения «To:».
 //		$headers[] = 'To: ';	# To: — адрес получателя (или адреса). При этом поле «To:» может не содержать адреса получателя, так как прохождение письма базируется на конвертном заголовке «To», а не на заголовке сообщения «To:».
-
+		# копия сообщения на этот адрес
+		if ($_to_сс_full) {
+			$headers[] = "CC: {$_to_сс_full}";
+		}
+		# скрытая копия сообщения на этот
+		if ($_to_bсс_full) {
+			$headers[] = "BCC: {$_to_bсс_full}";
+		}
 		$headers[] = 'From: ' . $_from_full;				# From: (с двоеточием) информация об адресе отправителя, указанная самим отправителем.
 		$headers[] = 'Subject: ' . $subject;				# Subject: — тема сообщения.
 		$headers[] = 'Date: ' . date('Y-m-d H:i:s');		# Date: — дата создания сообщения. Не стоит принимать на веру из-за возможности подделки или ошибки во времени у отправителя.
