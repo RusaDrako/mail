@@ -25,9 +25,7 @@ class mail_addon extends mail {
 		if (count($mail_array) > 0) {
 			foreach($mail_array as $v) {
 				$this
-						->to_clean()
-						->to($v)
-						->send()
+						->send($м)
 						;
 			}
 		}
@@ -39,11 +37,11 @@ class mail_addon extends mail {
 
 	/** Отправляет простое письмо */
 	public function send_mail($to, $from, $subject, $message) {
-		$this->to($to)
+		$this
 				->from($from)
 				->subject($subject)
 				->message($message, false);
-		return $this->send();
+		return $this->send($to);
 	}
 
 
